@@ -1,49 +1,885 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<link rel="stylesheet" href="css/reset.css">
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+	<title>reveal.js</title>
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/monokai.css">
+	<link rel="stylesheet" href="css/reset.css">
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css">
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/monokai.css">
+
+	<style>
+		code[class='xml'] {
+			white-space: pre-line;
+		}
+	</style>
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<h1>Android & accessibilité</h1>
+				<p>
+					Conseils pour les développeurs Android
+				</p>
+			</section>
+
+			<section>
+				<h2>Sommaire</h2>
+				<div style="display: flex">
+					<ul>
+						<li>Alternatives textuelles</li>
+						<li>Masquer des éléments</li>
+						<li>Lecture des en-têtes</li>
+						<li>Lecture des listes</li>
+						<li>Formulaire</li>
+						<li>Taille des textes</li>
+						<li>Déclencher une vocalisation</li>
+						<li>Régions "live"</li>
+					</ul>
+					<ul>
+						<li>Grouper des éléments</li>
+						<li>Ordre de lecture</li>
+						<li>Navigation au focus</li>
+						<li>Détection de TalkBack</li>
+						<li>Événements d’accessibilité</li>
+						<li>WebView</li>
+						<li>Outils d'analyse</li>
+					</ul>
+				</div>
+			</section>
+
+			<!-- Alternatives textuelles -->
+			<section>
+				<section>
+					<h2>Alternatives textuelles</h2>
+					<p>
+						Il peut être nécessaire de permettre la vocalisation d’un élément d'interface qui, par défaut, n'a 
+						aucune représentation textuelle. 
+						Par exemple, un composant <code>ImageButton</code> qui ne présente par défaut aucun libellé.
+					</p>
+					<pre><code class="xml" style="white-space: pre-line;" data-trim data-line-numbers="1-30">
+						<ImageButton
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_alignParentBottom="true"
+							android:layout_alignParentStart="true"
+							android:background="@null"
+							android:src="@drawable/ic_share"
+							android:contentDescription="@string/share" />
+					  </code>
+					</pre>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Méthode <code>setContentDescription</code>
+						</h3>
+						<p>La méthode <code>setContentDescription</code> permet d'associer une description au sein d'un contexte.</p>
+						<pre>
+							<code class="kotlin" data-trim data-line-numbers="1-30">
+								private fun updateImageButton() {
+								  if (playing) {
+								    playPauseToggleImageView.setImageResource(R.drawable.ic_pause)
+								    playPauseToggleImageView.setContentDescription(getString(R.string.pause))
+								  } else {
+								    playPauseToggleImageView.setImageResource(R.drawable.ic_play_arrow)
+								    playPauseToggleImageView.setContentDescription(getString(R.string.play))
+								  }
+								}
+							</code>
+						</pre>
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Bonnes pratiques
+						</h3>
+						<ul>
+							<li>Ne pas inclure le type de l'élément d'interface dans le contenu de la description, sauf exception (un <code>LinearLayout</code> transformé en bouton, par exemple).</li>
+							<li>Chaque description doit être unique.</li>
+							<li>Si l'élément est décoratif (élément graphique, par exemple), il ne doit vocaliser aucune description : 
+								<ul>
+									<li>soit configurer sa description à <code>@null</code> ;</li>
+									<li>soit configurer son attribut <code>android:importantForAccessibility</code> à "no".</li>
+								</ul>
+							</li>	
+						</ul>
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#setContentDescription(java.lang.CharSequence)"
+									target="_blank">setContentDescription</a></li>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#attr_android:contentDescription"
+									target="_blank">android:contentDescription</a></li>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#setImportantForAccessibility(int)"
+									target="_blank">setImportantForAccessibility</a></li>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#attr_android:importantForAccessibility"
+									target="_blank">android:importantForAccessibility</a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Masquer des éléments -->
+			<section>
+				<section>
+					<h2>Masquer des éléments</h2>
+					<p>
+						Il est possible de masquer des éléments aux outils d’accessibilité grâce aux attributs
+						d’accessibilité mais aussi de forcer certains éléments à être visibles pour les outils
+						d’accessibilité uniquement.
+					</p>
+					<p>
+						L'attribut <code>ImportantForAccessibility</code> permet d’indiquer qu’un élément est visible ou non de l’API d’accessibilité. 
+					</p>
+				</section>
+				<section>
+					<h3>Valeurs de l'attribut (1)</h3>
+					<p>
+						L’attribut <code>importantForAccessibility</code> est disponible pour tout élément qui hérite de <code>View</code> avec les valeurs suivantes :
+					</p>
+					<ul>
+						<li><code>auto</code> (0) : valeur par défaut, c’est le système qui décide. Par exemple, un Button aura sa valeur par défaut à 1 (yes) et un LinearLayout à 2 (no).</li>
+						<li><code>yes</code> (1) : la vue est importante pour l’accessibilité. Elle peut par exemple recevoir le focus de TalkBack.</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Valeurs de l'attribut (2)</h3>
+					<ul>
+						<li><code>no</code> (2) : la vue n’est pas importante pour l’accessibilité. Elle ne déclenche plus d’événement d’accessibilité et est par conséquent ignorée par des services tel que TalkBack.</li>
+						<li><code>noHideDescendants</code> (4) : la vue n’est pas importante pour l’accessibilité, mais également toutes ses vues filles. Cela permet de cacher tous les éléments d’une vue à l’accessibilité en une seule fois. Très utile sur les éléments custom.</li>
+					</ul>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#setImportantForAccessibility(int)"
+								target="_blank"><code>setImportantForAccessibility</code></a></li>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#attr_android:importantForAccessibility"
+								target="_blank"><code>android:importantForAccessibility</code></a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Lecture en-têtes -->
+			<section>
+				<section>
+					<div>
+						<h2>
+							En-têtes
+						</h2>
+						<p>Android Pie introduit un niveau de lecture supplémentaire des en-têtes : l'attribut <code>accessibilityHeading</code> 
+							permet de parcourir un écran titre par titre, sans considérer l'ensemble des éléments présents.</p>
+						<p>Le lecteur d’écran peut lire uniquement les en-têtes définis dans une page 
+							(geste "Slide vers le haut en utilisant un doigt"). Ces en-têtes permettent au lecteur 
+							de parcourir les grandes sections de la page pour voir si l’information cherchée s’y trouve, 
+							sans avoir à tout écouter.</p>
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							<code>accessibilityHeading</code>
+						</h3>
+						<p>L’attribut <code>android:accessibilityHeading</code> permet de signaler à l’API d’accessibilité 
+							qu'un élément texte doit être considéré comme un en-tête.</p>
+						<pre>
+							<code class="xml" style="white-space: pre-line;" data-trim data-line-numbers="1-30">
+								<TextView
+									[...]
+									android:id="@+id/myTextLevel1viewId"
+									android:accessibilityHeading="true"
+									/>
+							</code>
+						</pre>
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/reference/android/view/View#setAccessibilityHeading(boolean)"
+									target="_blank">setAccessibilityHeading</a></li>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#attr_android:accessibilityHeading"
+									target="_blank">android:accessibilityHeading</a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Lecture des listes -->
+			<section>
+				<section>
+					<div>
+						<h2>
+							Lecture des listes
+						</h2>
+						<p>TalkBack peut échouer à vocaliser une liste en une seule fois, notamment lorsqu’il s’agit une liste créée au moyen d’un <code>RecyclerView</code>.</p>
+						<p>Pour pallier ce problème, une solution simple existe. Il suffit de positionner l’attribut focusable à true pour chaque item de la liste. Cela a pour effet de forcer la synthèse vocale (TalkBack) à lire les items un par un.</p>
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/guide/topics/ui/layout/recyclerview"
+									target="_blank">RecyclerView</a></li>
+						</ul>
+					</div>
+				</section>
+			</section>	
+
+			<!-- Formulaire -->
+			<section>
+				<section>
+					<div>
+						<h2>
+							Formulaire
+						</h2>
+						<p>Il est important que les champs de formulaire soient liés à un label. Il y a 2 possibilités de liaison :</p>
+						<ul style="font-size: 0.8em">
+							<li><code>labelFor</code> permet de spécifier à une vue qu’elle est le label d’une autre vue. On peut utiliser cette méthode avec quasiment tout type de champ de formulaire. Utilisable depuis le xml <code>android:labelFor</code> ou le code <code>setLabelFor</code>. LabelFor est utilisable depuis tout élément qui hérite de View.</li>
+							<li><code>hint</code> est disponible pour les <code>EditText</code> ou <code>TextView</code>. Permet d’ajouter un texte d’exemple quand le champ de texte est vide. Utilisable depuis le xml <code>android:hint</code> ou le code <code>setHint</code>.</li>
+						</ul>
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							<code>labelFor</code>
+						</h3>
+						<p>L'attribut <code>android:labelFor</code> prend pour valeur l’id de la vue à labelliser.</p>
+						<pre>
+							<code class="xml" style="white-space: pre-line;" data-trim data-line-numbers="1-30">
+							<TextView
+							  [...]
+							  android:text="@string/jukebox"
+							  android:labelFor="@+id/edit_text" />
+							</code>
+						</pre>
+						<pre>
+							<code class="xml" style="white-space: pre-line;" data-trim data-line-numbers="1-30">
+							<EditText
+								android:id="@+id/edit_text"
+								[...]
+								android:padding="@dimen/edit_text_padding"
+								android:textColorHint="@color/very_dark_grey" />
+							</code>
+						</pre>
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							<code>hint</code>
+						</h3>
+						<p>L'attribut <code>android:hint</code> permet de décrire le comportement du composant en incorporant des explications
+							supplémentaires. Il a pour valeur l’id d’une chaîne de caractères.</p>
+						<pre>
+							<code class="xml" style="white-space: pre-line;" data-trim data-line-numbers="1-30">
+							<EditText
+								android:id="@+id/edit_text"
+								[...]
+								android:hint="@string/enter_favorite_song"
+								android:padding="@dimen/edit_text_padding"
+								android:textColorHint="@color/very_dark_grey" />
+							</code>
+						</pre>
+						<p>Google recommande d'utiliser soit labelFor soit hint, mais pas les deux. C'est discutable...</p>
+						<!-- TalkBack vocalise l'élément EditText : "[hint], zone de modification pour [labelFor]".-->
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#setLabelFor%28int%29"
+									target="_blank">setLabelFor</a></li>
+							<li><a href="https://developer.android.com/reference/android/R.attr.html#labelFor"
+									target="_blank">android:labelFor</a></li>
+							<li><a href="https://developer.android.com/reference/android/widget/TextView.html#setHint(int)"
+									target="_blank">setHint</a></li>
+							<li><a href="https://developer.android.com/reference/android/widget/TextView.html#attr_android:hint"
+									target="_blank">android:hint</a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Taille des textes -->
+			<section>
+				<section>
+					<div>
+						<h2>
+							Taille des textes
+						</h2>
+						<p>Afin de permettre à l’option "grands caractères" d’interagir correctement avec l’application, plusieurs points sont à respecter durant les développements.</p>
+						<ul>
+							<li>Utiliser une taille de police dynamique : le « sp ». Cette unité, spécifique à Android, permet d’obtenir une taille de police en fonction de la densité de pixel de l’écran. Il est plus que recommandé de l’utiliser, ne serait-ce que pour obtenir un design uniforme sur tous les types de devices Android.</li>
+						</ul>		
+					</div>
+				</section>
+				<section>
+					<div>
+						<h2>
+							Taille des textes
+						</h2>
+						<ul>
+							<li>Gérer les débordements de contenu : une erreur courante est d’utiliser une taille de texte dynamique (« sp » donc) mais de ne pas faire attention au conteneur. Si le texte grossit, le conteneur doit en faire autant pour ne pas qu’il y ait de débordement. On peut parfaitement jouer avec le min-height et le height des conteneurs pour obtenir un résultat correct (un height en wrap_content permet de laisser au système le soin de s’adapter).</li>
+						</ul>		
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://material.io/design/typography/#"
+									target="_blank">The type system (Material design)</a></li>
+							<li><a href="https://material.io/design/platform-guidance/cross-platform-adaptation.html#when-to-adapt"
+									target="_blank">Cross-platform adaptation (Material design)</a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Déclencher une vocalisation -->
+			<section>
+				<section>
+					<h2>Déclencher une vocalisation</h2>
+					<p>
+						Il est très facile de déclencher des vocalisations avec TalkBack. 
+						Déclencher une vocalisation est très utile dans le cas de contenu dynamique, 
+						au même titre que les LiveRegion (voir la section correspondante). 
+						Pour déclencher une vocalisation, il suffit de faire appel à la méthode <code>announceForAccessibility</code>
+						 en lui passant en paramètre l’id de la chaîne de caractères à vocaliser.
+					</p>
+				</section>
+				<section>
+					<h3><code>announceForAccessibility</code></h3>
+					<p>
+						La méthode <code>announceForAccessibility</code> est disponible sur tout élément 
+						qui hérite de <code>View</code> et se fait dans la langue du système.
+					</p>
+					<p>	
+						Attention : il s'agit ici de vocalisation TalkBack et non pas de TTS (Text To Speech) 
+						qui peut fonctionner indépendamment de l'activation de TalkBack.
+					</p>
+					<p>
+						Il utile de tester la version d’Android avant de déclencher une vocalisation TalkBack. 
+						En effet, announceForAccessibility ne fonctionne que depuis l’arrivée d’Android Jelly Bean.
+					</p>
+					<pre>
+						<code class="kotlin" data-trim data-line-numbers="1-30">
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+								myView.announceForAccessibility(getString(R.string.criteria_contentchange_ex1_announce))
+							}
+						</code>
+					</pre>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#announceForAccessibility(java.lang.CharSequence)"
+								target="_blank"><code>announceForAccessibility</code></a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Régions "live" -->
+			<section>
+				<section>
+					<h2>Régions "live"</h2>
+					<p>
+						Il est possible de spécifier à une vue qu’elle est une région « live », 
+						c’est-à-dire que son contenu est susceptible d’être modifié dynamiquement 
+						et qu’elle doit dans ce cas prévenir l’API d’accessibilité. 
+						Cela aura pour conséquence de générer des vocalisations avec TalkBack. 
+						Un exemple type d’utilisation : sur un formulaire, si l’utilisateur fait une erreur 
+						et qu’un message d’erreur apparaît, la vue contenant le message doit être définie 
+						comme une région "live".
+					</p>
+				</section>
+				<section>
+					<h3><code>setAccessibilityLiveRegion</code></h3>
+					<p>
+						La méthode <code>setAccessibilityLiveRegion</code> prend en paramètre un mode pour la région "live" :
+					</p>
+					<ul>
+						<li>ACCESSIBILITY_LIVE_REGION_NONE : la vue n’est pas une région "live" (valeur par défaut d'une vue).</li>
+						<li>ACCESSIBILITY_LIVE_REGION_POLITE : en cas de changement dans la vue, la vocalisation est effectuée de manière non prioritaire.</li>
+						<li>ACCESSIBILITY_LIVE_REGION_ASSERTIVE : en cas de changement dans la vue, la vocalisation est effectuée de manière prioritaire.</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Exemple de code</h3>		
+					<p>	
+						La méthode <code>setAccessibilityLiveRegion</code> est disponible sur tout élément qui hérite de View.
+					</p>
+					<pre>
+						<code class="xml" style="white-space: pre-line;" data-trim data-line-numbers="1-30">
+							<TextView
+							android:id="@+id/feedback_text_view"
+							[...]
+							android:padding="@dimen/standard_padding"
+							android:textSize="@dimen/large_text"
+							android:accessibilityLiveRegion="polite" />
+						</code>
+					</pre>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#setAccessibilityLiveRegion(int)"
+									target="_blank"><code>setAccessibilityLiveRegion</code></a></li>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#attr_android:accessibilityLiveRegion"
+									target="_blank"><code>android:accessibilityLiveRegion</code></a></li>
+							</li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Grouper des éléments -->
+			<section>
+				<section>
+					<h2>Grouper des éléments</h2>
+					<p>
+						On peut envisager de grouper des éléments pour vocaliser en une seule fois l'ensemble formé et
+						associer au groupe ainsi créé une action dédiée par exemple.
+					</p>
+					<p>
+						Dès lors, les éléments encapsulés ne doivent plus être considérés comme accessibles car seul
+						leur conteneur doit être perçu comme tel.
+					</p>
+				</section>
+				<section>
+					<h3>Exemple de code</h3>
+					<p>
+						Utilisation d'éléments <code>RelativeLayout</code> "focusables" pour regrouper des contenus textes.
+					</p>
+					<pre>
+						<code class="xml" data-trim data-line-numbers="1-30">
+							<LinearLayout
+							...
+							orientation="vertical">
+						
+							<RelativeLayout
+								...
+								android:focusable="true">
+						
+								<TextView
+								  ...  />
+								<TextView
+								  ...  />
+							</RelativeLayout>
+						
+							<RelativeLayout
+								...
+								android:focusable="true">
+						
+								<TextView
+								  ... />
+								<TextView
+								  ...  />
+							</RelativeLayout>
+						
+							<RelativeLayout
+								...
+								android:focusable="true">
+						
+								<TextView
+								  ...  />
+								<TextView
+								  ...  />
+							</RelativeLayout>
+						</LinearLayout>	
+            		</code></pre>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Bonnes pratiques
+						</h3>
+						<ul>
+							<li>La hiérarchie des contenus et son agencement déterminent le regroupement des contenus textes pour la vocalisation.</li>
+							<li>Regrouper des éléments "non-focusable" dans un conteneur "focusable" permet de les vocaliser comme un seul élément.</li>
+							<li>Pour regrouper logiquement des éléments associés entre eux, il peut être nécessaire de créer des ViewGroup imbriqués.</li>
+						</ul>
+					</div>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#attr_android:focusable"
+									target="_blank"><code>android:focusable</code></a></li>
+							<li><a href="https://developer.android.com/reference/android/view/ViewGroup"
+									target="_blank"><code>ViewGroup</code></a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Ordre de lecture -->
+			<section>
+				<section>
+					<h2>Ordre de lecture</h2>
+					<p>
+						L’ordre du focus du lecteur d’écran par défaut prend en compte plusieurs paramètres : 
+					</p>
+					<ul>
+						<li>La lecture « logique », en français, de gauche à droite et de haut en bas ;</li>
+						<li>Et la lecture du xml (ordre de déclaration des éléments). </li>						
+					</ul>
+				</section>
+				<section>
+					<h3>Deux méthodes</h3>
+					<p>
+						Il est tout à fait possible de redéfinir cet ordre de lecture au moyen de deux méthodes :
+					</p>
+					<ul>
+						<li>
+							<code>accessibilityTraversalAfter</code> : prend un id en paramètre et permet de spécifier à la vue qu’elle doit être décrite par l’accessibilité après la vue passée en paramètre.
+						</li>
+						<li>
+							<code>accessibilityTraversalBefore</code> : prend un id en paramètre et permet de spécifier à la vue qu’elle doit être décrite par l’accessibilité avant la vue passée en paramètre.
+						</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Exemple de code</h3>
+					<p>
+						Ces attributs peuvent être utilisés directement dans le xml 
+						mais également dans le code via les méthodes <code>setAccessibilityTraversalAfter</code> et <code>setAccessibilityTraversalBefore</code>. 
+						Ces méthodes sont disponibles pour tout élément qui hérite de <code>View</code>.
+					</p>
+					<pre>
+						<code class="kotlin" data-trim data-line-numbers="1-30">
+							volupButton.setAccessibilityTraversalAfter(myView.findViewById(R.id.remote0).getId())
+							voldownButton.setAccessibilityTraversalAfter(myView.findViewById(R.id.volup).getId())
+							chaineplusButton.setAccessibilityTraversalAfter(myView.findViewById(R.id.voldown).getId())
+							chainemoinsButton.setAccessibilityTraversalAfter(myView.findViewById(R.id.chaineplus).getId())
+						</code>
+					</pre>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#attr_android:accessibilityTraversalAfter"
+								target="_blank"><code>android:accessibilityTraversalAfter</code></a></li>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#setAccessibilityTraversalAfter(int)"
+								target="_blank"><code>setAccessibilityTraversalAfter</code></a></li>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#attr_android:accessibilityTraversalBefore"
+								target="_blank"><code>android:accessibilityTraversalBefore</code></a></li>
+							<li><a href="https://developer.android.com/reference/android/view/View.html#setAccessibilityTraversalBefore(int)"
+								target="_blank"><code>setAccessibilityTraversalBefore</code></a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Navigation au focus (clavier) -->
+			<section>
+				<section>
+					<h2>Navigation au focus (clavier)</h2>
+					<p>
+						Pour gérer la navigation au focus, il faut s’assurer de 3 choses :
+					</p>
+					<ul style="font-size: 0.8em;">
+						<li>Permettre le focus sur les éléments interactifs : la navigation au focus ne concerne que les éléments interactifs. Si, par exemple, votre application possède des vues custom cliquables, il faut s’assurer que ces vues soient focusables en positionnant l’attribut focusable à true.</li>
+						<li>Gérer l’affichage du focus : tout élément interactif peut recevoir le focus, il faut donc que le state_focused soit défini et permette de distinguer d’un seul coup d’œil quel élément a le focus.</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Navigation au focus (clavier)</h3>
+					<ul style="font-size: 0.8em;">
+						<li>Gérer l’ordre du focus : à travers les options nextFocusDown, nextFocusUp, nextFocusRight et nextFocusLeft, vous pouvez spécifier quelle vue doit prendre le focus selon l’utilisation des flèches bas, haut, droit et gauche. </li>
+					</ul>
+					<p>
+						La plupart du temps, seuls les point 1 et 2 sont à prendre la compte. En effet, le système Android est capable de déterminer assez précisément les positions des éléments les uns par rapport aux autres et donc de fournir un ordre de lecture au clavier logique et cohérent.
+					</p>
+				</section>
+				<section>
+					<h3>Options disponibles</h3>
+					<p>
+						Les options de gestion du focus : <code>nextFocusDown</code>, <code>nextFocusUp</code>, <code>nextFocusRight</code>, <code>nextFocusLeft</code>, <code>focusable</code> sont accessibles directement dans le xml ou dans le code à travers les méthodes correspondantes.
+					</p>
+					<p style="font-size: 0.8em;">							
+						À noter : Android Pie (9, API 28), introduit un focus spécifique au lecteur d’écran permet d’éviter les effets de bords entre le focus du lecteur d’écran (<code>screenReaderFocusable</code>) et le focus clavier (<code>focusable</code>). La navigation clavier n’est pas sensible au <code>screenReaderFocusable</code>.
+					</p>
+				</section>
+				<section>
+					<h3>Exemple</h3>
+					<p>
+						Le sélecteur permet de gérer la couleur d'un bouton en fonction de ses différentes états :
+					</p>
+					<pre>
+						<code class="xml" style="white-space: pre-line;" data-trim data-line-numbers="1-30">
+							&lt;selector xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+							&nbsp;&nbsp;&lt;item android:state_pressed="true"
+										android:color="#ffff0000" /&gt; <!-- pressed -->
+							&nbsp;&nbsp;&lt;item android:state_focused="true"
+							android:color="#ff0000ff" /&gt; <!-- focused -->
+							&nbsp;&nbsp;&lt;item android:color="#ff000000" /&gt; <!-- default -->
+							&lt;/selector&gt;
+
+							&lt;Button
+							&nbsp;&nbsp;android:layout_width="fill_parent"
+							&nbsp;&nbsp;android:layout_height="wrap_content"
+							&nbsp;&nbsp;android:text="@string/button_text"
+							&nbsp;&nbsp;android:textColor="@color/button_text" /&gt;
+						</code>
+					</pre>
+				</section>
+			</section>
+
+			<!-- Détecter si TalkBack est activé -->
+			<section>
+					<section>
+						<h2>Détecter si TalkBack est activé</h2>
+						<p>
+							Sous Android, il est possible de savoir si l’API d’accessibilité est activée, 
+							et par extension de savoir si TalkBack est activé.
+						</p>
+						<pre>
+							<code class="kotlin" data-trim data-line-numbers="1-30">
+								val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+								val isAccessibilityEnabled = am.isEnabled
+							</code>
+						</pre>
+					</section>
+					<section>
+						<div>
+							<h3>
+								Ressources
+							</h3>
+							<ul>
+								<li><a href="https://developer.android.com/reference/android/view/accessibility/AccessibilityManager"
+									target="_blank">AccessibilityManager</a></li>
+							</ul>
+						</div>
+					</section>
+			</section>
+
+			<!-- Événements d’accessibilité & custom views -->
+			<section>
+				<section>
+					<h2>Événements d’accessibilité</h2>
+					<p>
+						Android propose un bon nombre d’événements liés à l’API d’accessibilité.
+						Ils permettent d’enrichir des composants personnalisés (custom view) insuffisamment accessibles.</p> 
+					<p>	L’utilisation des événements d’accessibilité est assez rare dans les applications non dédiées à l’accessibilité, 
+						les autres options étant généralement suffisantes. 
+						Cependant, il faut savoir qu’ils existent et permettent de surcharger la vocalisation d’un composant.
+					</p>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://developer.android.com/reference/android/view/accessibility/AccessibilityEvent.html"
+									target="_blank">AccessibilityEvent</a></li>
+							<li><a href="https://developer.android.com/guide/topics/ui/accessibility/custom-views"
+									target="_blank">Make custom views more accessible</a></li>
+							<li><a href="https://github.com/Pascale22/A11yEventApp"
+									target="_blank">Exemple de code faisant usage des événements d'accessibilité</a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- WebView -->
+			<section>
+				<section>
+					<h2>Usage des <code>WebView</code></h2>
+					<p>
+						Les WebView ont un traitement un peu particulier sous Android. Pour commencer, 
+						si on veut qu’une page soit accessible, il faut que le contenu HTML le soit, 
+						à savoir qu’il respecte les normes internationales sur le sujet : les WCAG 2.1. 		
+					</p>
+					<p>
+						Il faut s’assurer que la WebView autorise le JavaScript : <code style="font-size: 0.8em">mWebView.getSettings().setJavaScriptEnabled(true)</code>.
+						Dans ces conditions, la page affichée à travers la <code>WebView</code> réagit convenablement à l’API d’accessibilité.
+					</p>
+				</section>
+				<section>
+					<div>
+						<h3>
+							Ressources
+						</h3>
+						<ul>
+							<li><a href="https://www.w3.org/TR/WCAG21/"
+									target="_blank">Web Content Accessibility Guidelines (WCAG) 2.1</a></li>
+							<li><a href="https://www.numerique.gouv.fr/publications/rgaa-accessibilite/"
+									target="_blank">Référentiel général d'amélioration de l'accessibilité – RGAA Version 4</a></li>
+							<li><a href="https://a11y-guidelines.orange.com/web/index.html"
+									target="_blank">Recommandations accessibilité Orange pour le web</a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+
+			<!-- Outils d'analyse -->
+			<section>
+				<section>
+					<h2>Outils d'analyse</h2>
+					<p>
+						Il est utile de pouvoir personnaliser certains composants ou interactions pour faciliter leur
+						prise en charge par VoiceOver. Deux cas d'usages courants :
+					</p>
+					<ul>
+						<li>Accessibility Scanner.</li>
+						<li>Pre-launch report on Google Play</li>
+						<li>Inspecteur de code (Android Studio)</li>
+						<li>UI Automator</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>Accessibility Scanner</h3>
+					<p>
+						Il s'agit d'une application mobile gratuite proposée par Google. 
+						Elle permet de relever d'éventuels problème d'accessibilité parmi les plus courants : 
+						absence d'alternatives textuelles, contrastes insuffisants, etc.
+					</p>
+				</section>
+				<section>
+					<h3>Pre-launch report sur Google Play</h3>
+					<p>
+						Le rapport de pré-lancement d'une application sur Google Play fournit parmi ses différents indicateurs 
+						un état des lieux de l'accessibilité de l'application soumise à la publication.
+					</p>
+				</section>
+				<section>
+					<h3>Inspecteur de code (Android Studio)</h3>
+					<p>
+						Cet outil intégré à Android Studio permet d'effectuer une vérification de la conformité du code sous différents aspects, 
+						et notamment l'accessibilité.
+					</p>
+					<figure>
+						<figcaption>Détection d'un attribut labelFor manquant :</figcaption>
+						<img src="/img/labelFor_missing.png"
+							alt="" style="width: 80%; height: 80%">
+					</figure>
+				</section>
+				<section>
+					<h3>UI Automator</h3>
+					<p>
+						Cet outil permet de tester les interactions qui se produisent entre applications.
+						...
+					</p>
+				</section>
+				<section>
+					<h3>Ressources</h3>
+					<ul>
+						<li><a href="https://play.google.com/store/apps/details?id=com.google.android.apps.accessibility.auditor"
+							target="_blank"><code>Accessibility Scanner</code></a></li>
+						<li><a href="https://support.google.com/accessibility/android/answer/6376570"
+							target="_blank"><code>Get started with Accessibility Scanner</code></a></li>
+						<li><a href="https://support.google.com/googleplay/android-developer/answer/7002270"
+							target="_blank">Use pre-launch reports to identify issues</a></li>
+						<li><a href="https://developer.android.com/studio/write/lint"
+							target="_blank">Improve your code with lint checks</a></li>
+						<li><a href="https://developer.android.com/training/testing/ui-automator"
+							target="_blank">UI Automator</a></li>
+						<li><a href="https://developer.android.com/training/testing/ui-testing/uiautomator-testing"
+									target="_blank">Test UI for multiple apps</a></li>
+					</ul>
+				</section>
+			</section>
+
+			<!-- Thanks -->
+			<section>
+				<h3>Merci de votre participation, mais il est toujours temps pour des questions...</h3>
+				<p>
+					Le contenu de cette présentation est largement redevable à la <a
+						href="https://a11y-guidelines.orange.com/mobile/criteria-android-dev.html">documentation proposée par
+						Orange</a> dont elle synthétise les points principaux, ainsi qu'à la <a href="https://developer.android.com/guide/topics/ui/accessibility">documentation 
+						du site d'Android</a>.<br>
+					Comme la documentation originale, cette présentation est sous <a
+						href="https://creativecommons.org/licenses/by-sa/3.0/fr/">licence CC BY SA 3.0</a>.
+				</p>
+				<p>
+					Restons en contact : contact@temesis.com.
+				</p>
+			</section>
+
 		</div>
+	</div>
 
-		<script src="js/reveal.js"></script>
+	<script src="js/reveal.js"></script>
 
-		<script>
-			// More info about config & dependencies:
-			// - https://github.com/hakimel/reveal.js#configuration
-			// - https://github.com/hakimel/reveal.js#dependencies
-			Reveal.initialize({
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true }
-				]
-			});
-		</script>
-	</body>
+	<script>
+		// More info about config & dependencies:
+		// - https://github.com/hakimel/reveal.js#configuration
+		// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			dependencies: [{
+					src: 'plugin/markdown/marked.js'
+				},
+				{
+					src: 'plugin/markdown/markdown.js'
+				},
+				{
+					src: 'plugin/notes/notes.js',
+					async: true
+				},
+				{
+					src: 'plugin/highlight/highlight.js',
+					async: true
+				}
+			]
+		});
+	</script>
+</body>
+
 </html>
